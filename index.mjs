@@ -28,16 +28,28 @@ const printLog = text => console.log('[i]', text);
     throw new Error('No service name: ' + ENV.AUTH_SERVICE + ' found!');
   }
 
-  {
-    printLog('Sending login request...');
-    const loginResult = await doLogin(authUrlHost, ENV.AUTH_USERNAME, ENV.AUTH_PASSWORD, authUrlQuery, pageInfo, serviceList[serviceIndex]);
-    if (loginResult.result == 'success') {
-      printLog('Successfully login!');
-    } else {
-      printLog('Failed to login!');
+  printLog('Sending login request...');
+  const loginResult = await doLogin(authUrlHost, ENV.AUTH_USERNAME, ENV.AUTH_PASSWORD, authUrlQuery, pageInfo, serviceList[serviceIndex]);
+  if (loginResult.result == 'success') printLog('Successfully login!');
+  else printLog('Failed to login!');
+
+  printLog('Login info:');
+  console.log(loginResult);
+
+  if (loginResult.result == 'success') {
+    printLog('Getting user info...');
+    const userInfo = await getUserInfo(authUrlHost, loginResult.userIndex);
+    console.log(userInfo);
+
+    if (userInfo.hasMabInfo) return;
+
+    printLog('Registering mac address for auto login...');
+    const registResult = await registAutoLoginMac(authUrlHost, loginResult, userInfo);
+
+    if (registResult.result == 'success') printLog('Successfully registered auto login');
+    else {
+      printLog('Failed to register auto login, reason: ' + registResult.message);
     }
-    printLog('Login info:');
-    console.log(loginResult);
   }
 
   ssh.disconnect();
@@ -95,6 +107,22 @@ function getServices(host, query, username) {
   });
 }
 
+function getUserInfo(host, userIndex = '') {
+  return new Promise((resolve, reject) => {
+    createGetPromise(host, 'InterFace', 'getOnlineUserInfo', {}, { userIndex: encodeURIComponent(userIndex) })
+      .then(res => {
+        let result = res.text;
+
+        try {
+          result = JSON.parse(result);
+        } catch (e) {
+          result = res.text;
+        }
+
+        resolve(result);
+      }).catch(e => reject(e));
+  });
+}
 
 function doLogin(host, _username, _password, query, pageInfo, _service = null) {
   const queryObj = Utils.parseQueryString(query);
@@ -125,6 +153,25 @@ function doLogin(host, _username, _password, query, pageInfo, _service = null) {
       } catch (e) {
         resolve(res.text);
       }
+    }).catch(e => reject(e));
+  });
+}
+
+function registAutoLoginMac(host, loginInfo, userInfo) {
+  return new Promise((resolve, reject) => {
+    createGetPromise(host, 'InterFace', 'registerMac', {}, {
+      userIndex: encodeURIComponent(loginInfo.userIndex),
+      mac: encodeURIComponent(userInfo.userMac)
+    }).then(res => {
+      let result = res.text;
+
+      try {
+        result = JSON.parse(result);
+      } catch (e) {
+        result = res.text;
+      }
+
+      resolve(result);
     }).catch(e => reject(e));
   });
 }
