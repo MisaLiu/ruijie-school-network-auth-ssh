@@ -73,8 +73,7 @@ function getAuthUrl(enrtyUrl) {
 
 function createGetPromise(host, doMethod, method, query = {}, data = null) {
   return ssh.send(
-    host + `eportal/${doMethod}.do?${(new URLSearchParams({ method: method, ...query})).toString()}`,
-    { 'User-Agent': ENV.USER_AGENT },
+    host + `eportal/${doMethod}.do?${(new URLSearchParams({ method: method, ...query})).toString()}`, {},
     'POST',
     data
   );

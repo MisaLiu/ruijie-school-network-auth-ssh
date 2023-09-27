@@ -1,4 +1,7 @@
 import { NodeSSH } from 'node-ssh';
+import ENV from './config.mjs';
+
+const isEmpty = text => !text || text == '';
 
 const ssh = new NodeSSH();
 
@@ -15,6 +18,10 @@ export function send(url, headers = {}, type = 'GET', data = null) {
     if (!ssh.isConnected()) rej(new Error('Not connected to server yet'));
 
     let command = `curl -i ${url}`;
+
+    if (!isEmpty(ENV.USER_AGENT)) {
+      command += ` -H "User-Agent: ${ENV.USER_AGENT}"`;
+    }
 
     for (const name in headers) {
       command += ` -H "${name}: ${headers[name]}"`;
