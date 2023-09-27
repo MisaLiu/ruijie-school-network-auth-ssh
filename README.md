@@ -15,12 +15,13 @@
         * `SSH_USERNAME`: 远程设备的用户名，例如 `root`
         * `SSH_PASSWORD`: 远程设备的密码，例如 `root`
     2. 网络登陆配置
+        * `AUTH_INTERFACE`: 指定用于验证的网卡（可空）
         * `AUTH_ENTRY_URL`: 网关登陆页面的入口网址，一般访问这个网址会包含一段跳转到登陆页面的 JavaScript 代码
         * `AUTH_USERNAME`: 你的网络账号
         * `AUTH_PASSWORD`: 你的网络密码
         * `AUTH_SERVICE`: 你需要登陆的网络服务，这个值视每个网关的具体设置而定，例如 `校园网`
     3. 其他配置
-        * `USER_AGENT`: 指定发送请求时使用的 User-Agent
+        * `USER_AGENT`: 指定发送请求时使用的 User-Agent（可空，推荐填写）
 3. 运行 `index.mjs`
 4. 观察输出，如果没有问题的话，应该就登陆成功了
 
