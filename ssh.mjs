@@ -33,6 +33,10 @@ export function send(url, headers = {}, type = 'GET', data = null) {
       command += ` -d '${(new URLSearchParams(data)).toString()}'`;
     }
 
+    if (!isEmpty(ENV.AUTH_INTERFACE)) {
+      command += ` --interface ${ENV.AUTH_INTERFACE}`;
+    }
+
     ssh.execCommand(command)
       .then(result => res(decodeRawRespond(result.stdout)))
       .catch(e => rej(e));
